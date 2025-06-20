@@ -2,27 +2,27 @@
 
 // 1
 
-// const express = require("express");
-// const app = express();
+const express = require("express");
+const app = express();
 
-// const PORT = 3000;
+const PORT = 3000;
 
-// function Sum(n){
-//   let sum = 0;
-//   for(let i=0;i<n;i++){
-//     sum += i;
-//   }
-//   return sum;
-// }
-// app.get('/', (req,res) => {
-//    const n = req.query.n;
-//    const ans = Sum(n);
-//    res.send("THE ANSWER IS " + ans);
-// })
+function Sum(n){
+  let sum = 0;
+  for(let i=0;i<n;i++){
+    sum += i;
+  }
+  return sum;
+}
+app.get('/', (req,res) => {
+   const n = req.query.n;
+   const ans = Sum(n);
+   res.send("THE ANSWER IS " + ans);
+})
 
-// app.listen(PORT, () => {
-//   console.log(`server is running on PORT ${PORT}`);
-// })
+app.listen(PORT, () => {
+  console.log(`server is running on PORT ${PORT}`);
+})
 
 
 // 2
@@ -90,5 +90,44 @@ app.delete("/",function(req,res){
   }
 });
 
+
+app.listen(3000);
+
+// 3
+
+const express = require("express");
+const app = express();
+
+app.get('/sum',function(req,res){
+  const a = parseInt(req.query.a);
+  const b = parseInt(req.query.b);
+  res.json({
+    "ans" : a + b
+  }); 
+})
+
+app.get('/multiply',function(req,res){
+  const a = parseInt(req.query.a);
+  const b = parseInt(req.query.b);
+  res.json({
+    "ans" : a * b
+  }); 
+})
+
+app.get('/subtract',function(req,res){
+  const a = parseInt(req.query.a);
+  const b = parseInt(req.query.b);
+  res.json({
+    "ans" : a - b
+  }); 
+})
+
+app.get('/divide',function(req,res){
+  const a = parseInt(req.query.a);
+  const b = parseInt(req.query.b);
+  res.json({
+    "ans" : a / b
+  }); 
+})
 
 app.listen(3000);
