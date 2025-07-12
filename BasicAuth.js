@@ -1,89 +1,119 @@
-const express = require('express');
-const jwt = require('jsonwebtoken');
-const JWT_SECRET = ""
+const express = require("express")
+const path = require("path");
+
 const app = express();
-app.use(express.json());
+app.use(express.json())
 
-const users = [];
+let users = [];
 
-app.post("/signup", function (req, res) {
+
+// Frontend routes
+app.get("/signup", function(req, res) {
+    res.sendFile(path.join(__dirname, "assets/signup.html"))
+})
+app.get("/signin", function(req, res) {
+    res.sendFile(path.join(__dirname, "assets/signin.html"))
+})
+app.get("/dashboard", function(req, res) {
+    res.sendFile(path.join(__dirname, "assets/dashboard.html"))
+})
+
+// backend routes
+app.post("/signup", function(req, res) {
     const username = req.body.username;
     const password = req.body.password;
+
+    // ideally check if a user already exists with this username
 
     users.push({
         username: username,
-        password: password
-    })    
-
-    res.json({
-        message: "You are signed up"
+        password: password,
+        todos: []
     })
 
-    console.log(users)
-    
+    res.send({
+        message: "You are successfully sign up"
+    })
 })
-
 app.post("/signin", function(req, res) {
-    
     const username = req.body.username;
     const password = req.body.password;
 
-    // maps and filter
-    let foundUser = null;
-
-    for (let i = 0; i<users.length; i++) {
-        if (users[i].username == username && users[i].password == password) {
-            foundUser = users[i]
+    let user = users.find(function(u) {
+        if (u.username == username && u.password == password) {
+            return true;
+        } else {
+            return false
         }
-    }
+    })
 
-    if (foundUser) {
-        const token = jwt.sign({
-            username: username,
-            password: password,
-            firstname,
-            lastName,
-            courses: []
-        }, JWT_SECRET) ;
-
-        // foundUser.token = token;
-        res.json({
-            token: token
-        })
-    } else {
-        res.status(403).send({
-            message: "Invalid username or password"
+    if (!user) {
+        return res.status(403).json({
+            message: "Incorrect username ans password"
         })
     }
-    console.log(users)
+
+    let token = Math.random();
+    user.token = token;
+
+    res.send({
+        token: token
+    })
 })
 
-app.get("/me", function(req, res) {
-    const token = req.headers.token // jwt
-    const decodedInformation = jwt.verify(token, JWT_SECRET);  // {username: "harkirat@gmail.com"}
-    const unAuthDecodedinfo = jwt.decode(token,);  // {username: "harkirat@gmail.com"}
-    const username = decodedInformation.username
-    let foundUser = null;
+app.post("/todos", function(req, res) {
+    const token = req.headers.token;
+    const todo = req.body.todo;
+    console.log(users);
+    console.log(token);
 
-    for (let i = 0; i < users.length; i++) {
-        if (users[i].username == username)  {
-            foundUser = users[i]
+    let user = users.find(function(u) {
+        if (u.token == token) {
+            return true
+        } else {
+            return false
         }
-    }
+    })
 
-    if (foundUser) {
-        res.json({
-            username: foundUser.username,
-            password: foundUser.password
+    if (!user) {
+        return res.status(403).json({
+            message: "Unauthenticated"
         })
     } else {
+        user.todos.push(todo)
         res.json({
-            message: "token invalid"
+            mesage: "Todo created"
         })
     }
-
 
 })
 
+app.get("/todos", function(req, res) {
+    const token = req.headers.token;
 
-app.listen(3000);// that the http server is listening on port 3000
+    let user = users.find(function(u) {
+        if (u.token == token) {
+            return true;
+        } else {
+            return false
+        }
+    })
+
+    if (!user) {
+        res.status(411).json({
+            message: "Cant find you"
+        })
+    } else {
+        res.send({
+            todos: user.todos
+        })
+    }
+
+    // return them their todos
+})
+
+app.delete("/todos", function(req ,res) {
+    const token = req.headers.token;
+})
+
+app.listen(3000);
